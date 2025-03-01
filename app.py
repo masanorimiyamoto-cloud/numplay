@@ -3,7 +3,7 @@
 from flask import Flask, request, jsonify
 from sudoku_solver import solve_sudoku
 from flask_cors import CORS
-
+from sudoku import Sudoku  # 🔥 高速なライブラリ
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -86,11 +86,10 @@ def generate_valid_sudoku():
 @app.route("/generate", methods=["GET"])
 def generate():
     """
-    React から GET /generate を受け取ると、数独問題を生成して返す
+    高速なライブラリを使って数独を生成
     """
-    print("新しい数独の問題を生成します...")  # ← デバッグ用
-    board = generate_valid_sudoku()
-    print("生成された問題:", board)  # ← デバッグ用
+    puzzle = Sudoku(3).difficulty(0.5)
+    board = puzzle.board
     return jsonify({"status": "ok", "board": board})
 
 if __name__ == "__main__":
