@@ -47,6 +47,11 @@ def solve():
 
     # solve_sudoku は board を直接書き換える実装なので、
     # 先にコピーを作るなど必要なら工夫してください。
+    print("Received board:", board)
+    print("Type of board:", type(board))
+    
+    if not isinstance(board, list) or not all(isinstance(row, list) for row in board):
+      return jsonify({"status": "fail", "message": "Invalid board format."})
     if Sudoku(board):
         
         return jsonify({"status": "ok", "solution": board})
