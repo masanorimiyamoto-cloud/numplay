@@ -1,7 +1,7 @@
 # app.py
 
 from flask import Flask, request, jsonify
-from sudoku_solver import solve_sudoku
+
 from flask_cors import CORS
 from sudoku import Sudoku  # 🔥 高速なライブラリ
 
@@ -47,40 +47,13 @@ def solve():
 
     # solve_sudoku は board を直接書き換える実装なので、
     # 先にコピーを作るなど必要なら工夫してください。
-    if solve_sudoku(board):
+    if Sudoku(board):
+        
         return jsonify({"status": "ok", "solution": board})
     else:
         return jsonify({"status": "fail", "message": "No solution found."})
 
 import random
-
-def generate_valid_sudoku():
-    """
-    唯一解を持つ数独問題を生成する
-    """
-    max_attempts = 50  # 最大50回試す
-    attempts = 0
-
-    while attempts < max_attempts:
-        board = [[0] * 9 for _ in range(9)]
-
-        # 15～20個のランダムな数字を配置
-        for _ in range(20):
-            row, col = random.randint(0, 8), random.randint(0, 8)
-            num = random.randint(1, 9)
-            board[row][col] = num
-
-        temp_board = [row[:] for row in board]  # コピーを作る
-        if solve_sudoku(temp_board):  # 解けるならOK
-            print("✅ 解ける数独が生成されました")
-            return board
-        
-        attempts += 1  # 試行回数を増やす
-
-    # 解ける問題が見つからなかった場合のフォールバック
-    print("⚠️ 解ける問題が見つからなかったので、空の盤面を返します")
-    return [[0] * 9 for _ in range(9)]
-
 
 
 @app.route("/generate", methods=["GET"])
