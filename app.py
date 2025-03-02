@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sudoku import Sudoku
 import traceback
-
+import os
 app = Flask(__name__)
 
 # CORSの設定をすべてのリクエストに適用する
@@ -50,5 +50,9 @@ def generate():
         app.logger.error(f"Exception in /generate: {e}\n{traceback.format_exc()}")
         return jsonify({"status": "error", "message": "Internal server error."}), 500
 
+
+
+
 if __name__ == "__main__":
-    app.run(debug=False)
+    port = int(os.environ.get("PORT", 10000))  # Render のポートと統一
+    app.run(host="0.0.0.0", port=port)
