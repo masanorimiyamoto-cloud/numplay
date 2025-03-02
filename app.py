@@ -3,8 +3,8 @@ from flask_cors import CORS
 from sudoku import Sudoku
 import traceback
 import os
-from .sudoku_solver import solve_sudoku
-#from sudoku_solver import solve_sudoku
+
+from sudoku_solver import solve_sudoku
 import copy
 
 app = Flask(__name__)
