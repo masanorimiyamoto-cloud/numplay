@@ -79,10 +79,17 @@ def generate():
     """
     高速なライブラリを使って数独を生成
     """
+    try:
+        # 9×9の数独を生成
+        puzzle = Sudoku(9).difficulty(0.5)  # Sudoku(9) に修正
+        board = puzzle.board
+        
+        return jsonify({"status": "ok", "board": board})
     
-    puzzle = Sudoku(3).difficulty(0.5)
-    board = puzzle.board
-    return jsonify({"status": "ok", "board": board})
+    except Exception as e:
+        app.logger.error(f"Exception in /generate: {e}\n{traceback.format_exc()}")
+        return jsonify({"status": "error", "message": "Internal server error."}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True)
