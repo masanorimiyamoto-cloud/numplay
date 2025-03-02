@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from sudoku import Sudoku  # 🔥 高速なライブラリ
+from sudoku import Sudoku
 import traceback
 
 app = Flask(__name__)
 
-# CORS の設定: すべてのドメインからのアクセスを許可
-CORS(app, resources={r"/*": {"origins": "https://sudoku-frontend-tan.vercel.app"}})
+# CORSの設定をすべてのリクエストに適用する
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.route("/")
 def index():
@@ -25,8 +25,7 @@ def solve():
         if not isinstance(board, list) or len(board) != 9 or not all(isinstance(row, list) and len(row) == 9 for row in board):
             return jsonify({"status": "fail", "message": "Invalid board format. Must be a 9x9 grid."}), 400
 
-        # 数独の解決
-        from sudoku_solver import solve_sudoku  # sudoku_solver.py をインポート
+        from sudoku_solver import solve_sudoku
         import copy
         board_copy = copy.deepcopy(board)
 
@@ -42,10 +41,9 @@ def solve():
 @app.route("/generate", methods=["GET"])
 def generate():
     try:
-        # 9×9の数独を生成
-        puzzle = Sudoku(9).difficulty(0.5)  
+        puzzle = Sudoku(9).difficulty(0.5)
         board = puzzle.board
-        
+
         return jsonify({"status": "ok", "board": board})
     
     except Exception as e:
