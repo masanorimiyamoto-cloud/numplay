@@ -3,10 +3,11 @@ from flask_cors import CORS
 from sudoku import Sudoku
 import traceback
 import os
+
 app = Flask(__name__)
 
-# CORSの設定をすべてのリクエストに適用する
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+# すべてのエンドポイントで CORS を有効化
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route("/")
 def index():
@@ -20,7 +21,6 @@ def solve():
             return jsonify({"status": "error", "message": "No board data provided."}), 400
 
         board = data["board"]
-        print("Received board:", board)
 
         if not isinstance(board, list) or len(board) != 9 or not all(isinstance(row, list) and len(row) == 9 for row in board):
             return jsonify({"status": "fail", "message": "Invalid board format. Must be a 9x9 grid."}), 400
@@ -41,18 +41,18 @@ def solve():
 @app.route("/generate", methods=["GET"])
 def generate():
     try:
-        puzzle = Sudoku(9).difficulty(0.5)
+        puzzle = Sudoku(9)  # `difficulty(0.5)` を削除し、問題を簡単にする
         board = puzzle.board
 
-        return jsonify({"status": "ok", "board": board})
+        # `Access-Control-Allow-Origin` を手動で追加
+        response = jsonify({"status": "ok", "board": board})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        return response
     
     except Exception as e:
         app.logger.error(f"Exception in /generate: {e}\n{traceback.format_exc()}")
         return jsonify({"status": "error", "message": "Internal server error."}), 500
 
-
-
-
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render のポートと統一
+    port = int(os.environ.get("PORT", 10000))  # Render のポートに対応
     app.run(host="0.0.0.0", port=port)
