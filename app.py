@@ -3,6 +3,9 @@ from flask_cors import CORS
 from sudoku import Sudoku
 import traceback
 import os
+from .sudoku_solver import solve_sudoku
+#from sudoku_solver import solve_sudoku
+import copy
 
 app = Flask(__name__)
 
@@ -25,8 +28,7 @@ def solve():
         if not isinstance(board, list) or len(board) != 9 or not all(isinstance(row, list) and len(row) == 9 for row in board):
             return jsonify({"status": "fail", "message": "Invalid board format. Must be a 9x9 grid."}), 400
 
-        from sudoku_solver import solve_sudoku
-        import copy
+        
         board_copy = copy.deepcopy(board)
 
         if solve_sudoku(board_copy):
