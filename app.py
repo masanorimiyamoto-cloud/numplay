@@ -41,17 +41,18 @@ def solve():
 @app.route("/generate", methods=["GET"])
 def generate():
     try:
-        puzzle = Sudoku(9)  # `difficulty(0.5)` を削除し、問題を簡単にする
-        board = puzzle.board
+        puzzle = Sudoku(9)  # ライブラリが返す形式を確認
+        board = puzzle.board  # これが 9x9 の2次元リストを想定
 
-        # `Access-Control-Allow-Origin` を手動で追加
-        response = jsonify({"status": "ok", "board": board})
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        return response
-    
+        # board が何なのかをログ出力
+        print("DEBUG: puzzle.board =", board)
+        # もし board がすでに 9x9 リストなら、そのまま JSON で返せばOK
+        return jsonify({"status": "ok", "board": board})
+
     except Exception as e:
-        app.logger.error(f"Exception in /generate: {e}\n{traceback.format_exc()}")
+        app.logger.error(f"Exception in /generate: {e}")
         return jsonify({"status": "error", "message": "Internal server error."}), 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))  # Render のポートに対応
