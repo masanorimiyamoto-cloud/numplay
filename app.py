@@ -13,6 +13,11 @@ CORS(app, supports_credentials=True)
 def index():
     return "Sudoku Solver API is running!"
 
+from flask import Flask, request, jsonify
+import traceback
+
+app = Flask(__name__)
+
 @app.route("/solve", methods=["POST"])
 def solve():
     """
@@ -39,26 +44,34 @@ def solve():
           "message": "No solution found."
         }
     """
-    data = request.get_json()
-    if not data or "board" not in data:
-        return jsonify({"status": "error", "message": "No board data provided."}), 400
+    try:
+        data = request.get_json()
+        if not data or "board" not in data:
+            return jsonify({"status": "error", "message": "No board data provided."}), 400
 
-    board = data["board"]
+        board = data["board"]
 
-    # solve_sudoku は board を直接書き換える実装なので、
-    # 先にコピーを作るなど必要なら工夫してください。
-    print("Received board:", board)
-    print("Type of board:", type(board))
-    
-    if not isinstance(board, list) or not all(isinstance(row, list) for row in board):
-      return jsonify({"status": "fail", "message": "Invalid board format."})
-    if Sudoku(board):
-        
-        return jsonify({"status": "ok", "solution": board})
-    else:
-        return jsonify({"status": "fail", "message": "No solution found."})
+        # 受け取った board の構造をチェック
+        print("Received board:", board)
+        print("Type of board:", type(board))
 
-import random
+        if not isinstance(board, list) or len(board) != 9 or not all(isinstance(row, list) and len(row) == 9 for row in board):
+            return jsonify({"status": "fail", "message": "Invalid board format. Must be a 9x9 grid."}), 400
+
+        # Sudoku インスタンスの作成
+        sudoku_solver = Sudoku(board)
+
+        # 数独の解決処理を実行
+        if sudoku_solver.solve():
+            return jsonify({"status": "ok", "solution": sudoku_solver.board})
+        else:
+            return jsonify({"status": "fail", "message": "No solution found."})
+
+    except Exception as e:
+        app.logger.error(f"Exception in /solve: {e}\n{traceback.format_exc()}")
+        return jsonify({"status": "error", "message": "Internal server error."}), 500
+
+
 
 
 @app.route("/generate", methods=["GET"])
@@ -66,6 +79,7 @@ def generate():
     """
     高速なライブラリを使って数独を生成
     """
+    
     puzzle = Sudoku(3).difficulty(0.5)
     board = puzzle.board
     return jsonify({"status": "ok", "board": board})
